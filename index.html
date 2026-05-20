@@ -1,1 +1,276 @@
-PLACEHOLDER
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Özel Rezervasyon & Muhasebe Paneli</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <section id="auth-view" class="auth-card">
+      <div class="brand-block">
+        <p class="eyebrow">Private Admin</p>
+        <h1>Rezervasyon ve Muhasebe Paneli</h1>
+        <p class="muted">Yalnızca yetkili kullanıcı girişi içindir.</p>
+      </div>
+
+      <form id="login-form" class="stack">
+        <label>
+          E-posta
+          <input id="email" type="email" autocomplete="email" required />
+        </label>
+        <label>
+          Şifre
+          <input id="password" type="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit">Giriş yap</button>
+        <p id="login-error" class="error"></p>
+      </form>
+    </section>
+
+    <section id="app-view" class="app hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Private Admin</p>
+          <h1>Rezervasyon & Muhasebe</h1>
+        </div>
+        <div class="topbar-actions">
+          <span id="user-email" class="user-pill"></span>
+          <button id="logout-btn" class="secondary">Çıkış</button>
+        </div>
+      </header>
+
+      <nav class="tabs">
+        <button class="tab active" data-tab="dashboard">Özet</button>
+        <button class="tab" data-tab="reservations">Rezervasyonlar</button>
+        <button class="tab" data-tab="expenses">Gelir / Gider</button>
+      </nav>
+
+      <main>
+        <section id="dashboard-panel" class="panel active">
+          <div class="metric-grid">
+            <article class="metric">
+              <span>Bu ay beklenen gelir</span>
+              <strong id="metric-expected-income">₺0</strong>
+            </article>
+            <article class="metric">
+              <span>Bu ay tahsil edilen</span>
+              <strong id="metric-collected-income">₺0</strong>
+            </article>
+            <article class="metric">
+              <span>Açık ödeme</span>
+              <strong id="metric-outstanding">₺0</strong>
+            </article>
+            <article class="metric">
+              <span>Bu ay gider</span>
+              <strong id="metric-expenses">₺0</strong>
+            </article>
+            <article class="metric wide">
+              <span>Net nakit</span>
+              <strong id="metric-net-cash">₺0</strong>
+            </article>
+          </div>
+
+          <div class="two-col">
+            <article class="card">
+              <div class="card-head">
+                <h2>Yaklaşan gelişler</h2>
+                <span class="muted">Önümüzdeki 14 gün</span>
+              </div>
+              <div id="upcoming-list" class="list"></div>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h2>Ödemesi açık kayıtlar</h2>
+                <span class="muted">Tam tahsil edilmemiş rezervasyonlar</span>
+              </div>
+              <div id="outstanding-list" class="list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="reservations-panel" class="panel">
+          <div class="split-layout">
+            <article class="card">
+              <div class="card-head">
+                <h2>Rezervasyon ekle / güncelle</h2>
+              </div>
+
+              <form id="reservation-form" class="form-grid">
+                <input id="reservation-id" type="hidden" />
+
+                <label>
+                  Kedi adı
+                  <input id="cat-name" required />
+                </label>
+
+                <label>
+                  Sahip adı
+                  <input id="owner-name" />
+                </label>
+
+                <label>
+                  Geliş tarihi
+                  <input id="check-in-date" type="date" required />
+                </label>
+
+                <label>
+                  Çıkış tarihi
+                  <input id="check-out-date" type="date" />
+                </label>
+
+                <label>
+                  Rezervasyon durumu
+                  <select id="reservation-status">
+                    <option value="pending">Bekliyor</option>
+                    <option value="confirmed">Kesinleşti</option>
+                    <option value="cancelled">İptal</option>
+                  </select>
+                </label>
+
+                <label>
+                  Kedi durumu
+                  <select id="arrival-status">
+                    <option value="not_arrived">Henüz gelmedi</option>
+                    <option value="arrived">Geldi</option>
+                    <option value="no_show">Gelmedi</option>
+                  </select>
+                </label>
+
+                <label>
+                  Toplam ücret
+                  <input id="total-price" type="number" min="0" step="0.01" value="0" />
+                </label>
+
+                <label>
+                  Tahsil edilen
+                  <input id="amount-received" type="number" min="0" step="0.01" value="0" />
+                </label>
+
+                <label class="full">
+                  Not
+                  <textarea id="reservation-notes" rows="3"></textarea>
+                </label>
+
+                <div class="form-actions full">
+                  <button type="submit">Kaydet</button>
+                  <button id="reservation-reset-btn" type="button" class="secondary">Temizle</button>
+                </div>
+
+                <p id="reservation-message" class="form-message full"></p>
+              </form>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h2>Rezervasyon listesi</h2>
+                <div class="inline-filters">
+                  <input id="reservation-search" placeholder="Kedi veya sahip ara" />
+                  <select id="reservation-filter">
+                    <option value="all">Tümü</option>
+                    <option value="upcoming">Gelecek</option>
+                    <option value="payment_open">Ödemesi açık</option>
+                    <option value="arrived">Geldi</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Kedi</th>
+                      <th>Sahip</th>
+                      <th>Tarih</th>
+                      <th>Durum</th>
+                      <th>Ödeme</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="reservations-table-body"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="expenses-panel" class="panel">
+          <div class="split-layout">
+            <article class="card">
+              <div class="card-head">
+                <h2>Gider ekle / güncelle</h2>
+              </div>
+
+              <form id="expense-form" class="form-grid">
+                <input id="expense-id" type="hidden" />
+
+                <label>
+                  Tarih
+                  <input id="expense-date" type="date" required />
+                </label>
+
+                <label>
+                  Kategori
+                  <select id="expense-category">
+                    <option value="mama">Mama</option>
+                    <option value="kum">Kum</option>
+                    <option value="temizlik">Temizlik</option>
+                    <option value="veteriner">Veteriner</option>
+                    <option value="ulasim">Ulaşım</option>
+                    <option value="diger">Diğer</option>
+                  </select>
+                </label>
+
+                <label>
+                  Tutar
+                  <input id="expense-amount" type="number" min="0" step="0.01" required />
+                </label>
+
+                <label class="full">
+                  Açıklama
+                  <textarea id="expense-description" rows="3"></textarea>
+                </label>
+
+                <div class="form-actions full">
+                  <button type="submit">Kaydet</button>
+                  <button id="expense-reset-btn" type="button" class="secondary">Temizle</button>
+                </div>
+
+                <p id="expense-message" class="form-message full"></p>
+              </form>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h2>Gider listesi</h2>
+                <input id="expense-search" placeholder="Kategori veya açıklama ara" />
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Tarih</th>
+                      <th>Kategori</th>
+                      <th>Tutar</th>
+                      <th>Açıklama</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="expenses-table-body"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
